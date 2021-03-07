@@ -28,23 +28,28 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
     myPromise.then(username => {
         var d = new Date();
-        // d.toLocaleString();       // -> "2/1/2013 7:37:08 AM"
-        // d.toLocaleDateString();   // -> "2/1/2013"
-        // d.toLocaleTimeString();
 
         client.channels.fetch(defaultTextChannel).then(
             channel => {
                 if (oldState.channelID == null && newState.channelID != null) {   
-                    message = `[${d.toLocaleTimeString()} - EST] **${username}** joined **<#${newState.channelID}>**`
-                    channel.send(message)
+                    client.channels.fetch(newState.channelID).then(channel => {
+                            message = `[${d.toLocaleTimeString()} - EST] **${username}** joined **${channel.name}**`
+                            channel.send(message)
+                        })
                 } 
                 else if (oldState.channelID != null && newState.channelID == null) {
-                    message = `[${d.toLocaleTimeString()} - EST] **${username}** has left the server`
-                    channel.send(message)
+                    client.channels.fetch(oldState.channelID).then(channel => {
+                        message = `[${d.toLocaleTimeString()} - EST] **${username}** has left the server`
+                        channel.send(message)
+                    })
                 }
                 else if (oldState.channelID != null && newState.channelID != null && (oldState.channelID !== newState.channelID)) {
-                    message = `[${d.toLocaleTimeString()} - EST] **${username}** switched from **<#${oldState.channelID}>** to **<#${newState.channelID}>**`
-                    channel.send(message)
+                    client.channels.fetch(oldState.channelID).then(oldChannel => {
+                        client.channels.fetch(newState.channelID).then(newChannel => {
+                            message = `[${d.toLocaleTimeString()} - EST] **${username}** switched from **${oldChannel.name}** to **${newChannel.name}**`
+                            channel.send(message)
+                        })
+                    })
                 }
             }
         );
