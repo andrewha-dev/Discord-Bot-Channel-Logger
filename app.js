@@ -1,13 +1,13 @@
-const Discord = require("discord.js");
+const Discord = require('discord.js');
 var config = require('./config.json');
 const client = new Discord.Client();
 
-const build = "0.0.1"; // Change with each update
+const build = '0.0.3'; // Change with each update
 const defaultTextChannel = config.CHANNEL_ID
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.username}!`);
-  console.log("Build: " + build);
+  console.log('Build: ' + build);
 });
 
 client.on('voiceStateUpdate', async (oldState, newState) => {
@@ -31,23 +31,26 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
         client.channels.fetch(defaultTextChannel).then(
             channel => {
+                const channelToSend = channel
                 if (oldState.channelID == null && newState.channelID != null) {   
-                    client.channels.fetch(newState.channelID).then(channel => {
-                            message = `[${d.toLocaleTimeString()} - EST] **${username}** joined **${channel.name}**`
-                            channel.send(message)
+                    client.channels.fetch(newState.channelID).then(newChannel => {
+                            message = `[${d.toLocaleTimeString()} - EST] **${username}** joined **${newChannel.name}**`
+                            console.log(message)
+                            channelToSend.send(message)
                         })
                 } 
                 else if (oldState.channelID != null && newState.channelID == null) {
-                    client.channels.fetch(oldState.channelID).then(channel => {
-                        message = `[${d.toLocaleTimeString()} - EST] **${username}** has left the server`
-                        channel.send(message)
-                    })
+                    message = `[${d.toLocaleTimeString()} - EST] **${username}** has left the server`
+                    console.log(message)
+                    channelToSend.send(message)
+
                 }
                 else if (oldState.channelID != null && newState.channelID != null && (oldState.channelID !== newState.channelID)) {
                     client.channels.fetch(oldState.channelID).then(oldChannel => {
                         client.channels.fetch(newState.channelID).then(newChannel => {
                             message = `[${d.toLocaleTimeString()} - EST] **${username}** switched from **${oldChannel.name}** to **${newChannel.name}**`
-                            channel.send(message)
+  
+                            channelToSend.send(message)
                         })
                     })
                 }
